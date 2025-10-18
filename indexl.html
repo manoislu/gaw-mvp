@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GAW - Générateur d'Audit Web</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; text-align: center; }
+    input { width: 80%; padding: 10px; margin-bottom: 10px; }
+    button { padding: 10px 20px; cursor: pointer; }
+    .result { text-align: left; margin-top: 20px; background: #f9f9f9; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>🕵️‍♂️ Générateur d'Audit Web (GAW)</h1>
+  <p>Entrez l'URL de votre site à auditer :</p>
+  <input type="url" id="siteUrl" placeholder="https://example.com" required>
+  <br>
+  <button onclick="launchAudit()">Lancer l'audit</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    async function launchAudit() {
+      const url = document.getElementById('siteUrl').value;
+      if (!url) return alert('Merci de saisir une URL.');
+      document.getElementById('result').innerHTML = '⏳ Audit en cours...';
+
+      try {
+        const res = await fetch('https://ton-worker.cloudflare.workers.dev/audit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const data = await res.json();
+        let html = `<h3>Résultats :</h3>`;
+        for (const [key, value] of Object.entries(data)) {
+          html += `<p><strong>${key}</strong> : ${value ? '✅' : '❌'}</p>`;
+        }
+        document.getElementById('result').innerHTML = html;
+      } catch (e) {
+        document.getElementById('result').innerHTML = '⚠️ Erreur : ' + e.message;
+      }
+    }
+  </script>
+</body>
+</html>
